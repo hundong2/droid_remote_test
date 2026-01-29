@@ -16,11 +16,20 @@ import java.time.Duration
 private val logger = KotlinLogging.logger {}
 
 fun main() {
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
-        .start(wait = true)
+    val deviceManager = DeviceManager()
+    
+    // Register shutdown hook to clean up resources
+    Runtime.getRuntime().addShutdownHook(Thread {
+        deviceManager.close()
+        logger.info { "DeviceManager closed" }
+    })
+    
+    embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
+        module(deviceManager)
+    }.start(wait = true)
 }
 
-fun Application.module() {
+fun Application.module(deviceManager: DeviceManager) {
     install(ContentNegotiation) {
         json(Json {
             prettyPrint = true
@@ -30,18 +39,17 @@ fun Application.module() {
     }
 
     install(CORS) {
-        anyHost()
+        allowHost("localhost:*")
+        allowHost("127.0.0.1:*")
         allowHeader("Content-Type")
     }
 
     install(WebSockets) {
         pingPeriod = Duration.ofSeconds(15)
         timeout = Duration.ofSeconds(15)
-        maxFrameSize = Long.MAX_VALUE
+        maxFrameSize = 1024 * 1024 // 1MB max frame size
         masking = false
     }
-
-    val deviceManager = DeviceManager()
     
     routing {
         get("/") {

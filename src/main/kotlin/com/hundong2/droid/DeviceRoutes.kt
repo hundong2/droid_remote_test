@@ -20,12 +20,19 @@ fun Route.deviceRoutes(deviceManager: DeviceManager) {
         get {
             val devices = deviceManager.getDevices()
             val deviceInfos = devices.map { device ->
+                // Get basic device properties
+                val properties = try {
+                    deviceManager.getDeviceProperties(device.serial)
+                } catch (e: Exception) {
+                    emptyMap()
+                }
+                
                 DeviceInfo(
                     serial = device.serial,
                     state = device.state.toString(),
-                    model = null,
-                    product = null,
-                    device = null,
+                    model = properties["ro.product.model"],
+                    product = properties["ro.product.name"],
+                    device = properties["ro.product.device"],
                     transportId = null
                 )
             }

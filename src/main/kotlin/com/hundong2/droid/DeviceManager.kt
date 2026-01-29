@@ -77,20 +77,6 @@ class DeviceManager {
     }
     
     /**
-     * Execute shell command and get output as flow
-     */
-    suspend fun executeCommandFlow(serial: String, command: String): Flow<String> = flow {
-        try {
-            val request = ShellCommandRequest(command)
-            val result: ShellCommandResult = adbClient.execute(request, serial)
-            emit(result.output)
-        } catch (e: Exception) {
-            logger.error(e) { "Failed to execute command on device $serial: $command" }
-            emit("ERROR: ${e.message}")
-        }
-    }
-    
-    /**
      * Get device properties
      */
     suspend fun getDeviceProperties(serial: String): Map<String, String> {

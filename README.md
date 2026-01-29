@@ -45,6 +45,22 @@ This project is a server built with Kotlin, Ktor web framework, and the Adam lib
 - Android Debug Bridge (ADB) 설치 및 실행 중
 - 연결된 Android 디바이스 또는 에뮬레이터
 
+## 보안 주의사항 (Security Notes)
+
+⚠️ **중요**: 이 서버는 개발 및 테스트 목적으로 설계되었습니다.
+
+- 기본적으로 서버는 `0.0.0.0:8080`에 바인딩되어 네트워크에서 접근 가능합니다
+- 프로덕션 환경에서는 인증 메커니즘을 추가하거나 방화벽으로 보호해야 합니다
+- 로컬 개발 전용으로 사용하려면 Application.kt에서 `host = "127.0.0.1"`로 변경하세요
+- CORS는 localhost와 127.0.0.1로만 제한되어 있습니다
+
+⚠️ **Important**: This server is designed for development and testing purposes.
+
+- By default, the server binds to `0.0.0.0:8080` and is accessible from the network
+- For production use, add authentication mechanisms or protect with a firewall
+- For local development only, change to `host = "127.0.0.1"` in Application.kt
+- CORS is restricted to localhost and 127.0.0.1 only
+
 ## 설치 및 실행 (Installation & Running)
 
 ### 1. 프로젝트 빌드
