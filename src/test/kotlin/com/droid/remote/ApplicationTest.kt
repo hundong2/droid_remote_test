@@ -30,4 +30,19 @@ class ApplicationTest {
             assertEquals("OK", bodyAsText())
         }
     }
+    
+    @Test
+    fun testApiStatus() = testApplication {
+        application {
+            configureRouting()
+        }
+        
+        client.get("/api/status").apply {
+            assertEquals(HttpStatusCode.OK, status)
+            val response = bodyAsText()
+            assertTrue(response.contains("running"))
+            assertTrue(response.contains("droid-remote-test"))
+            assertTrue(response.contains("1.0.0"))
+        }
+    }
 }
