@@ -44,10 +44,11 @@ object InputValidator {
      */
     fun escapeShellText(text: String): String {
         // Remove or escape potentially dangerous characters
-        return text.replace("\"", "\\\"")
+        // IMPORTANT: Escape backslash first to avoid double-escaping
+        return text.replace("\\", "\\\\")
+                  .replace("\"", "\\\"")
                   .replace("$", "\\$")
                   .replace("`", "\\`")
-                  .replace("\\", "\\\\")
                   .replace(";", "")
                   .replace("&", "")
                   .replace("|", "")

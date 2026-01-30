@@ -1,5 +1,6 @@
 package com.hundong2.droid
 
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -39,9 +40,11 @@ fun Application.module(deviceManager: DeviceManager) {
     }
 
     install(CORS) {
-        allowHost("localhost:*")
-        allowHost("127.0.0.1:*")
+        allowHost("localhost", schemes = listOf("http", "https"))
+        allowHost("127.0.0.1", schemes = listOf("http", "https"))
         allowHeader("Content-Type")
+        allowMethod(HttpMethod.Get)
+        allowMethod(HttpMethod.Post)
     }
 
     install(WebSockets) {

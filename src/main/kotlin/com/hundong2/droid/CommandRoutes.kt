@@ -74,6 +74,14 @@ fun Route.commandRoutes(deviceManager: DeviceManager) {
                 HttpStatusCode.BadRequest,
                 ErrorResponse("Missing serial")
             )
+            
+            if (!InputValidator.isValidDeviceSerial(serial)) {
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse("Invalid device serial format")
+                )
+            }
+            
             val params = call.receiveParameters()
             val apkPath = params["apk_path"] ?: return@post call.respond(
                 HttpStatusCode.BadRequest,
@@ -88,7 +96,8 @@ fun Route.commandRoutes(deviceManager: DeviceManager) {
                 )
             }
             
-            val result = deviceManager.executeCommand(serial, "pm install $apkPath")
+            // Use proper shell escaping by quoting the path
+            val result = deviceManager.executeCommand(serial, "pm install \"$apkPath\"")
             call.respond(CommandResponse(result.success, result.output, result.error))
         }
         
@@ -97,6 +106,14 @@ fun Route.commandRoutes(deviceManager: DeviceManager) {
                 HttpStatusCode.BadRequest,
                 ErrorResponse("Missing serial")
             )
+            
+            if (!InputValidator.isValidDeviceSerial(serial)) {
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse("Invalid device serial format")
+                )
+            }
+            
             val params = call.receiveParameters()
             val packageName = params["package"] ?: return@post call.respond(
                 HttpStatusCode.BadRequest,
@@ -121,6 +138,13 @@ fun Route.commandRoutes(deviceManager: DeviceManager) {
                 ErrorResponse("Missing serial")
             )
             
+            if (!InputValidator.isValidDeviceSerial(serial)) {
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse("Invalid device serial format")
+                )
+            }
+            
             val result = deviceManager.executeCommand(serial, "reboot")
             call.respond(CommandResponse(result.success, result.output, result.error))
         }
@@ -131,6 +155,13 @@ fun Route.commandRoutes(deviceManager: DeviceManager) {
                 ErrorResponse("Missing serial")
             )
             
+            if (!InputValidator.isValidDeviceSerial(serial)) {
+                return@get call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse("Invalid device serial format")
+                )
+            }
+            
             val result = deviceManager.executeCommand(serial, "dumpsys window displays | grep 'init'")
             call.respond(CommandResponse(result.success, result.output, result.error))
         }
@@ -140,6 +171,14 @@ fun Route.commandRoutes(deviceManager: DeviceManager) {
                 HttpStatusCode.BadRequest,
                 ErrorResponse("Missing serial")
             )
+            
+            if (!InputValidator.isValidDeviceSerial(serial)) {
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse("Invalid device serial format")
+                )
+            }
+            
             val params = call.receiveParameters()
             val text = params["text"] ?: return@post call.respond(
                 HttpStatusCode.BadRequest,
@@ -158,6 +197,14 @@ fun Route.commandRoutes(deviceManager: DeviceManager) {
                 HttpStatusCode.BadRequest,
                 ErrorResponse("Missing serial")
             )
+            
+            if (!InputValidator.isValidDeviceSerial(serial)) {
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse("Invalid device serial format")
+                )
+            }
+            
             val params = call.receiveParameters()
             val x = params["x"] ?: return@post call.respond(
                 HttpStatusCode.BadRequest,
@@ -168,11 +215,18 @@ fun Route.commandRoutes(deviceManager: DeviceManager) {
                 ErrorResponse("Missing y coordinate")
             )
             
-            // Validate coordinates are numeric
+            // Validate coordinates are numeric and in reasonable range
             if (!InputValidator.isNumeric(x) || !InputValidator.isNumeric(y)) {
                 return@post call.respond(
                     HttpStatusCode.BadRequest,
                     ErrorResponse("Coordinates must be numeric")
+                )
+            }
+            
+            if (!InputValidator.isInRange(x, 0, 10000) || !InputValidator.isInRange(y, 0, 10000)) {
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse("Coordinates must be within valid screen bounds (0-10000)")
                 )
             }
             
@@ -185,6 +239,14 @@ fun Route.commandRoutes(deviceManager: DeviceManager) {
                 HttpStatusCode.BadRequest,
                 ErrorResponse("Missing serial")
             )
+            
+            if (!InputValidator.isValidDeviceSerial(serial)) {
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse("Invalid device serial format")
+                )
+            }
+            
             val params = call.receiveParameters()
             val x1 = params["x1"] ?: return@post call.respond(
                 HttpStatusCode.BadRequest,
@@ -214,6 +276,23 @@ fun Route.commandRoutes(deviceManager: DeviceManager) {
                 )
             }
             
+            // Validate coordinates are in reasonable range
+            if (!InputValidator.isInRange(x1, 0, 10000) || !InputValidator.isInRange(y1, 0, 10000) ||
+                !InputValidator.isInRange(x2, 0, 10000) || !InputValidator.isInRange(y2, 0, 10000)) {
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse("Coordinates must be within valid screen bounds (0-10000)")
+                )
+            }
+            
+            // Validate duration is in reasonable range (1-10000ms)
+            if (!InputValidator.isInRange(duration, 1, 10000)) {
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse("Duration must be between 1 and 10000 milliseconds")
+                )
+            }
+            
             val result = deviceManager.executeCommand(serial, "input swipe $x1 $y1 $x2 $y2 $duration")
             call.respond(CommandResponse(result.success, result.output, result.error))
         }
@@ -223,17 +302,32 @@ fun Route.commandRoutes(deviceManager: DeviceManager) {
                 HttpStatusCode.BadRequest,
                 ErrorResponse("Missing serial")
             )
+            
+            if (!InputValidator.isValidDeviceSerial(serial)) {
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse("Invalid device serial format")
+                )
+            }
+            
             val params = call.receiveParameters()
             val keycode = params["keycode"] ?: return@post call.respond(
                 HttpStatusCode.BadRequest,
                 ErrorResponse("Missing keycode")
             )
             
-            // Validate keycode is numeric
+            // Validate keycode is numeric and in valid Android keycode range
             if (!InputValidator.isNumeric(keycode)) {
                 return@post call.respond(
                     HttpStatusCode.BadRequest,
                     ErrorResponse("Keycode must be numeric")
+                )
+            }
+            
+            if (!InputValidator.isInRange(keycode, 0, 999)) {
+                return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse("Keycode must be within valid Android keycode range (0-999)")
                 )
             }
             
