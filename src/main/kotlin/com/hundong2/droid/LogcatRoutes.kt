@@ -71,10 +71,6 @@ fun Route.logcatRoutes(deviceManager: DeviceManager) {
             }
             
             val linesParam = call.request.queryParameters["lines"]
-            val lines = linesParam?.toIntOrNull() ?: 100
-            
-            // Limit to reasonable maximum
-            val validLines = lines.coerceIn(1, 10000)
             
             if (linesParam != null && !InputValidator.isNumeric(linesParam)) {
                 return@get call.respond(
@@ -82,6 +78,11 @@ fun Route.logcatRoutes(deviceManager: DeviceManager) {
                     LogcatErrorResponse("Lines parameter must be numeric")
                 )
             }
+
+            val lines = linesParam?.toIntOrNull() ?: 100
+
+            // Limit to reasonable maximum
+            val validLines = lines.coerceIn(1, 10000)
             
             val result = deviceManager.executeCommand(serial, "logcat -d -t $validLines")
             

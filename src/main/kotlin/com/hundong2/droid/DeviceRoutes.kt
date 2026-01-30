@@ -40,7 +40,16 @@ fun Route.deviceRoutes(deviceManager: DeviceManager) {
         }
         
         get("/{serial}/properties") {
-            val serial = call.parameters["serial"] ?: return@get call.respondText("Missing serial")
+            val serial = call.parameters["serial"]
+            if (serial.isNullOrBlank()) {
+                call.respond(mapOf("error" to "Missing serial parameter"))
+                return@get
+            }
+
+            if (!InputValidator.isValidDeviceSerial(serial)) {
+                call.respond(mapOf("error" to "Invalid device serial"))
+                return@get
+            }
             val properties = deviceManager.getDeviceProperties(serial)
             call.respond(properties)
         }

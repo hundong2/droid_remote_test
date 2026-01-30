@@ -183,7 +183,7 @@ droid_remote_test/
 
 ## 향후 개선사항 (Future Improvements)
 
-- [ ] 인증 및 권장 시스템
+- [ ] 인증 및 인가 시스템
 - [ ] 다중 디바이스 동시 제어
 - [ ] 스크린샷 캡처 기능
 - [ ] 파일 전송 (push/pull)
