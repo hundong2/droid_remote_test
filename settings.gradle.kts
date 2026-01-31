@@ -1,1 +1,1 @@
-rootProject.name = "droid-remote-test"
+rootProject.name = "droid_remote_test"

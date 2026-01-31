@@ -11,6 +11,7 @@
 .mtj.tmp/
 
 # Package Files #
+*.jar
 *.war
 *.nar
 *.ear
@@ -29,6 +30,7 @@ replay_pid*
 .gradle/
 build/
 !gradle/wrapper/gradle-wrapper.jar
+gradle-app.setting
 !**/src/main/**/build/
 !**/src/test/**/build/
 
@@ -40,10 +42,16 @@ build/
 out/
 
 # Eclipse
+.settings/
 .classpath
 .project
-.settings/
 bin/
 
 # VS Code
 .vscode/
+
+# macOS
+.DS_Store
+
+# Temporary files
+tmp/
